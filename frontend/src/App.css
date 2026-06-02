@@ -1,0 +1,50 @@
+/* App-level styles only - minimal overrides */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-content {
+  flex: 1;
+}
+
+/* Hero gradient */
+.hero-gradient {
+  background: radial-gradient(1200px circle at 20% 10%, hsl(43 96% 56% / 0.10), transparent 55%),
+              radial-gradient(900px circle at 80% 0%, hsl(217 91% 32% / 0.12), transparent 50%);
+}
+
+/* Card hover */
+.card-hover {
+  transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+}
+.card-hover:hover {
+  box-shadow: 0 4px 20px hsl(var(--foreground) / 0.08);
+  transform: translateY(-2px);
+}
+
+/* Image placeholder */
+.img-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+}
+
+/* FAQ numbering */
+.faq-number {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Smooth content transitions */
+.page-content > * {
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0.4; }
+  to   { opacity: 1; }
+}

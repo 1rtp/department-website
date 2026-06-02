@@ -1,0 +1,698 @@
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge" />
+<title>Кафедра КН та ІТ — Встановлення</title>
+<HTA:APPLICATION
+  APPLICATIONNAME="KafedraSetup"
+  BORDER="thin"
+  BORDERSTYLE="normal"
+  CAPTION="yes"
+  MAXIMIZEBUTTON="yes"
+  MINIMIZEBUTTON="yes"
+  SHOWINTASKBAR="yes"
+  SINGLEINSTANCE="yes"
+  SYSMENU="yes"
+  WINDOWSTATE="normal"
+  SCROLL="no"
+/>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+.log-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── ГЛОБАЛЬНІ СТИЛІ ТЕМНОЇ ТЕМИ ── */
+html, body {
+  width:100%; height:100%;
+  background: #060d1a;
+  color: #e2e8f0;
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  overflow: hidden;
+  font-size: 16px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* ── HEADER ───────────────────────────── */
+.hdr {
+  background: #0d1b2e;
+  border-bottom: 1px solid #1a2f4a;
+  padding: 0 40px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+  position: relative;
+}
+.hdr::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #1d4ed8 0%, #3b82f6 50%, transparent 100%);
+}
+.hdr-text h1 {
+  font-size: 22px; font-weight: 700;
+  color: #e2e8f0;
+  letter-spacing: -0.4px;
+}
+.hdr-text p {
+  font-size: 14px; color: #64748b;
+  margin-top: 2px;
+}
+.hdr-status {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 8px;
+}
+.status-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #64748b;
+  transition: background 0.4s;
+}
+.status-dot.running { background: #3b82f6; box-shadow: 0 0 8px #3b82f6; animation: pulse 1.2s infinite; }
+.status-dot.done    { background: #34d399; box-shadow: 0 0 8px #34d399; }
+.status-dot.error   { background: #f87171;   box-shadow: 0 0 8px #f87171; }
+.status-label { font-size: 14px; color: #64748b; font-weight: 500; }
+
+@keyframes pulse {
+  0%,100% { opacity:1; }
+  50%      { opacity:0.4; }
+}
+
+/* ── MAIN CONTENT ─────────────────────── */
+.main {
+  flex: 1;
+  display: flex;
+  gap: 0;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── LEFT PANEL ───────────────────────── */
+.left-panel {
+  width: 400px;
+  flex-shrink: 0;
+  background: #0d1b2e;
+  border-right: 1px solid #1a2f4a;
+  display: flex;
+  flex-direction: column;
+  padding: 30px 25px;
+  gap: 15px;
+  overflow-y: auto;
+}
+
+.progress-section { 
+  display: flex; 
+  flex-direction: column; 
+  width: 100%;
+  margin-bottom: 20px;
+}
+.progress-label {
+  font-size: 13px; font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Надійне вирівнювання лінії та відсотків */
+.progress-container {
+  width: 100%;
+  margin-top: 12px; /* Цей відступ залізобетонно відсуває лінію від назви вниз */
+}
+
+.progress-wrap {
+  background: #060d1a; 
+  border: 1px solid #1a2f4a; 
+  border-radius: 999px;
+  height: 20px; 
+  overflow: hidden;
+  width: 80%;
+  float: left;
+}
+.progress-bar {
+  height: 100%;
+  background: #1d4ed8; 
+  background: linear-gradient(90deg, #1d4ed8, #3b82f6);
+  border-radius: 999px;
+  width: 0%;
+}
+
+.progress-pct {
+  font-size: 16px; font-weight: 700;
+  color: #93c5fd;
+  width: 20%;
+  text-align: right;
+  display: inline-block;
+  line-height: 20px;
+}
+
+.divider {
+  height: 1px;
+  background: #1a2f4a;
+  margin: 10px 0;
+  clear: both; /* Очищення потоку після float */
+}
+
+/* ── STEP CARDS ───────────────────────── */
+.step-card {
+  background: #122038;
+  border: 1px solid #1a2f4a;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.step-card::before {
+  content:'';
+  position:absolute; left:0; top:0; bottom:0; width:4px;
+  background: #1e3a5f;
+}
+.step-card.active { border-color: #1d4ed8; box-shadow: 0 0 0 1px rgba(59,130,246,0.15), 0 4px 20px rgba(29,78,216,0.15); }
+.step-card.active::before { background: #3b82f6; }
+.step-card.done   { border-color: #059669; box-shadow: 0 0 0 1px rgba(5,150,105,0.15); }
+.step-card.done::before   { background: #34d399; }
+.step-card.error  { border-color: #dc2626;   box-shadow: 0 0 0 1px rgba(220,38,38,0.15); }
+.step-card.error::before  { background: #f87171; }
+
+.step-num {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: #1a2f4a;
+  color: #64748b;
+  font-weight: 700; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-right: 16px;
+}
+.step-card.active .step-num { background: #1d4ed8;  color:#fff; box-shadow: 0 0 12px rgba(59,130,246,0.5); }
+.step-card.done   .step-num { background: #059669; color:#fff; }
+.step-card.error  .step-num { background: #dc2626;   color:#fff; }
+
+.step-content { flex:1; min-width:0; }
+.step-title {
+  font-size: 17px; font-weight: 600;
+  color: #e2e8f0;
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap;
+}
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px; font-weight: 600;
+  background: rgba(29,78,216,0.2);
+  color: #93c5fd;
+  border: 1px solid rgba(59,130,246,0.25);
+  font-family: 'IBM Plex Mono', monospace;
+  margin-left: 10px;
+}
+.step-sub {
+  font-size: 14px; color: #64748b;
+  margin-top: 6px;
+  line-height: 1.5;
+}
+.step-card.active .step-sub { color: #93c5fd; }
+.step-card.done   .step-sub { color: #34d399; }
+.step-card.error  .step-sub { color: #f87171; }
+
+.spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(59,130,246,0.3);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── RIGHT PANEL (LOG) ────────────────── */
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #060d1a;
+}
+
+.log-header {
+  background: #0d1b2e;
+  border-bottom: 1px solid #1a2f4a;
+  padding: 20px 30px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.log-header-left {
+  display: flex; align-items: center; gap: 10px;
+}
+.log-title {
+  font-size: 14px; font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase; letter-spacing: 1px;
+  margin-right: 12px;
+}
+.log-count {
+  font-size: 12px;
+  background: #122038;
+  border: 1px solid #1a2f4a;
+  color: #64748b;
+  padding: 2px 8px; border-radius: 999px;
+}
+.scroll-btn {
+  background: #1e3a5f;
+  border: 1px solid #1a2f4a;
+  color: #93c5fd;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Space Grotesk', sans-serif;
+  margin-right: 12px;
+}
+.scroll-btn:hover { background: #3b82f6; color: #ffffff; }
+
+.log-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 30px;
+  min-height: 0;
+}
+.log-body::-webkit-scrollbar { width: 6px; }
+.log-body::-webkit-scrollbar-track { background: #0d1b2e; }
+.log-body::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 3px; }
+.log-body::-webkit-scrollbar-thumb:hover { background: #1d4ed8; }
+
+.log-entry {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(26,47,74,0.4);
+  align-items: baseline;
+  font-family: 'IBM Plex Mono', 'Consolas', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.log-time {
+  color: #1e3a5f;
+  font-size: 12px;
+  flex-shrink: 0;
+  min-width: 65px;
+}
+.log-msg { flex:1; min-width:0; word-break: break-all; }
+.log-entry.ok   .log-msg { color: #34d399; }
+.log-entry.info .log-msg { color: #93c5fd; }
+.log-entry.warn .log-msg { color: #fcd34d; }
+.log-entry.err  .log-msg { color: #f87171; }
+.log-entry.dim  .log-msg { color: #64748b; }
+.log-entry.sep  .log-msg { color: #1e3a5f; letter-spacing: 2px; }
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 12px 30px;
+  border-radius: 10px;
+  border: none;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: 0.2px;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  color: #fff;
+  border: 1px solid #1e3a5f;
+  box-shadow: 0 4px 16px rgba(29,78,216,0.4);
+}
+.btn-primary:hover { box-shadow: 0 6px 24px rgba(29,78,216,0.55); background: #3b82f6; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; background: #1a2f4a; }
+.btn-ghost {
+  background: #122038;
+  border: 1px solid #1a2f4a;
+  color: #94a3b8;
+}
+.btn-ghost:hover { background: #1a2f4a; color: #e2e8f0; }
+
+/* ── FOOTER ───────────────────────────── */
+.footer {
+  background: #0d1b2e;
+  border-top: 1px solid #1a2f4a;
+  padding: 30px;
+  display: flex; align-items: center;
+  flex-shrink: 0;
+  gap: 16px;
+}
+
+/* ── NEXT STEPS ── */
+.next-steps {
+  margin-top: 12px;
+  background: rgba(5,150,105,0.08);
+  border: 1px solid rgba(5,150,105,0.2);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: none;
+  clear: both;
+}
+.next-steps h3 {
+  font-size: 13px; font-weight: 700;
+  color: #34d399;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  margin-bottom: 10px;
+}
+.next-step-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  margin-bottom: 8px;
+}
+.next-step-item:last-child { margin-bottom: 0; }
+.nsi-num {
+  width: 18px; height: 18px;
+  background: rgba(5,150,105,0.25);
+  color: #34d399;
+  border-radius: 50%;
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+  margin-right: 10px;
+}
+.nsi-text { font-size: 13px; color: #94a3b8; line-height: 1.5; }
+.nsi-code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: #93c5fd;
+  background: rgba(29,78,216,0.1);
+  padding: 1px 6px; border-radius: 4px;
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="hdr">
+    <div class="hdr-text">
+      <h1>Кафедра КН та ІТ &mdash; Встановлення</h1>
+      <p>Автоматична інсталяція залежностей та створення конфігурацій</p>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <div class="left-panel">
+
+      <div class="progress-section">
+        <div class="progress-label">Загальний прогрес</div>
+        <div class="progress-container">
+          <div class="progress-wrap">
+            <div class="progress-bar" id="pb"></div>
+          </div>
+          <div class="progress-pct" id="pct">0%</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="step-card" id="s1">
+        <div class="step-num" id="sn1">1</div>
+        <div class="step-content">
+          <div class="step-title">Python пакети <span class="badge">backend/</span></div>
+          <div class="step-sub" id="s1t">Очікування запуску...</div>
+        </div>
+      </div>
+
+      <div class="step-card" id="s2">
+        <div class="step-num" id="sn2">2</div>
+        <div class="step-content">
+          <div class="step-title">Node.js пакети <span class="badge">frontend/</span></div>
+          <div class="step-sub" id="s2t">Очікування запуску...</div>
+        </div>
+      </div>
+
+      <div class="step-card" id="s3">
+        <div class="step-num" id="sn3">3</div>
+        <div class="step-content">
+          <div class="step-title">Конфігурація <span class="badge">.env</span></div>
+          <div class="step-sub" id="s3t">Очікування запуску...</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="next-steps" id="nextSteps">
+        <h3>&#9654; Наступні кроки</h3>
+        <div class="next-step-item">
+          <div class="nsi-num">1</div>
+          <div class="nsi-text">Заповніть <span class="nsi-code">SMTP_PASSWORD</span> у <span class="nsi-code">backend/.env</span></div>
+        </div>
+        <div class="next-step-item">
+          <div class="nsi-num">2</div>
+          <div class="nsi-text"><span class="nsi-code">cd backend</span><br>
+          <span class="nsi-code">python -m uvicorn server:app --reload --port 8000</span></div>
+        </div>
+        <div class="next-step-item">
+          <div class="nsi-num">3</div>
+          <div class="nsi-text"><span class="nsi-code">cd frontend</span><br>
+          <span class="nsi-code">yarn start</span></div>
+        </div>
+        <div class="next-step-item">
+          <div class="nsi-num">4</div>
+          <div class="nsi-text">Відкрийте <span class="nsi-code">localhost:3000</span></div>
+        </div>
+        <div class="next-step-item">
+          <div class="nsi-num">5</div>
+          <div class="nsi-text"><strong>Кастомний порт БД:</strong> Якщо змінили порт у <span class="nsi-code">MONGO_URL</span> (наприклад, <span class="nsi-code">27020</span>), запустіть базу в окремій консолі: <span class="nsi-code">mongod --port 27020 --dbpath "шлях_до_створеної_папки"</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="right-panel">
+      <div class="log-header">
+        <div class="log-header-left">
+          <span class="log-title">&#128196; Лог виконання</span>
+          <span class="log-count" id="logCount">0 рядків</span>
+        </div>
+        <div class="log-actions">
+          <button class="scroll-btn" onclick="scrollLog()">&#8595; До кінця</button>
+          <button class="btn btn-primary" id="startBtn" onclick="runSetup()">&#9654;&nbsp; Встановити</button>
+          <button class="btn btn-ghost"   id="closeBtn" onclick="window.close()" style="display:none">Закрити</button>
+        </div>
+      </div>
+      <div class="log-body" id="log">
+        <div class="log-entry info">
+          <span class="log-time">--:--:--</span>
+          <span class="log-msg">Готовий до встановлення. Натисніть &laquo;Встановити&raquo; для початку.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer" style="justify-content: center; text-align: center;">
+    <span class="footer-hint" id="hint" style="text-align: center; width: 100%; font-size: 15px;">
+      Встановлення залежностей може зайняти <strong>кілька хвилин</strong> — не закривайте вікно
+    </span>
+  </div>
+
+</div>
+
+<script language="JavaScript">
+var shell  = new ActiveXObject("WScript.Shell");
+var fso    = new ActiveXObject("Scripting.FileSystemObject");
+var logN   = 0;
+
+function ts() {
+  var t = new Date();
+  return ("0"+t.getHours()).slice(-2)+":"+("0"+t.getMinutes()).slice(-2)+":"+("0"+t.getSeconds()).slice(-2);
+}
+
+function log(msg, cls) {
+  logN++;
+  var box = document.getElementById("log");
+  if (!box) return;
+  var d   = document.createElement("div");
+  d.className = "log-entry" + (cls ? " "+cls : " dim");
+  d.innerHTML = '<span class="log-time">'+ts()+'</span><span class="log-msg">'+msg+'</span>';
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+  document.getElementById("logCount").innerText = logN + " рядків";
+}
+
+function scrollLog() {
+  var box = document.getElementById("log");
+  if (box) box.scrollTop = box.scrollHeight;
+}
+
+function setProgress(pct) {
+  var pb = document.getElementById("pb");
+  var pt = document.getElementById("pct");
+  if (pb) pb.style.width  = pct + "%";
+  if (pt) pt.innerText   = pct + "%";
+}
+
+function setStep(n, state, text) {
+  var card  = document.getElementById("s"+n);
+  var sub   = document.getElementById("s"+n+"t");
+  var num   = document.getElementById("sn"+n);
+  if (!card) return;
+  card.className = "step-card " + state;
+
+  if (state === "active") {
+    sub.innerHTML  = '<span class="spinner"></span>' + text;
+    num.innerHTML  = n;
+  } else if (state === "done") {
+    sub.innerText  = text;
+    num.innerHTML = "&#10003;";
+  } else if (state === "error") {
+    sub.innerText  = text;
+    num.innerHTML = "&#10007;";
+  }
+}
+
+function setStatus(state, label) {
+  var dot = document.getElementById("statusDot");
+  var lbl = document.getElementById("statusLabel");
+  if (dot) dot.className = "status-dot " + state;
+  if (lbl) lbl.innerText = label;
+}
+
+function getBaseDir() {
+  var raw = location.pathname.replace(/^\//, "").replace(/\//g, "\\");
+  return fso.GetParentFolderName(raw) + "\\";
+}
+
+function runCmd(cmd) {
+  return shell.Run('cmd.exe /c ' + cmd, 0, true);
+}
+
+function runSetup() {
+  var btn = document.getElementById("startBtn");
+  btn.disabled = true;
+  btn.innerHTML = "&#9201;&nbsp; Встановлення...";
+  setStatus("running", "Встановлення...");
+  document.getElementById("hint").innerHTML = "Зачекайте — не закривайте вікно під час встановлення";
+
+  var base     = getBaseDir();
+  var backend  = base + "backend\\";
+  var frontend = base + "frontend\\";
+  var bEnv     = backend  + ".env";
+  var fEnv     = frontend + ".env";
+  var logFile  = "%TEMP%\\kafedra_install.log";
+
+  log("Директорія проєкту: " + base, "info");
+  log("─────────────────────────────────────────────────────────", "sep");
+
+  /* ─── STEP 1 ─── */
+  setStep(1, "active", "Встановлення Python пакетів...");
+  setProgress(8);
+  log("Запуск: python -m pip install -r requirements.txt", "info");
+
+  var r1 = runCmd('cd /d "' + backend + '" && python -m pip install -r requirements.txt >> ' + logFile + ' 2>&1');
+
+  if (r1 === 0) {
+    setStep(1, "done", "Python залежності встановлено ✓");
+    setProgress(33);
+    log("pip install — завершено успішно", "ok");
+  } else {
+    setStep(1, "error", "Помилка! Перевірте що Python встановлено і доступний.");
+    setProgress(15);
+    log("python -m pip завершився з кодом " + r1, "err");
+  }
+
+  log("─────────────────────────────────────────────────────────", "sep");
+
+  /* ─── STEP 2 ─── */
+  setStep(2, "active", "Встановлення Node.js пакетів...");
+  setProgress(40);
+
+  var yarnOk = shell.Run('cmd.exe /c yarn --version >> ' + logFile + ' 2>&1', 0, true);
+  var r2;
+  if (yarnOk === 0) {
+    log("yarn знайдено → yarn install", "info");
+    r2 = runCmd('cd /d "' + frontend + '" && yarn install >> ' + logFile + ' 2>&1');
+  } else {
+    log("yarn не знайдено → npm install", "warn");
+    r2 = runCmd('cd /d "' + frontend + '" && npm install >> ' + logFile + ' 2>&1');
+  }
+
+  if (r2 === 0) {
+    setStep(2, "done", "Node.js залежності встановлено ✓");
+    setProgress(75);
+    log("Залежності фронтенду встановлено успішно", "ok");
+  } else {
+    setStep(2, "error", "Помилка! Перевірте що Node.js встановлено.");
+    log("npm/yarn завершився з кодом " + r2, "err");
+  }
+
+  log("─────────────────────────────────────────────────────────", "sep");
+
+  /* ─── STEP 3 ─── */
+  setStep(3, "active", "Створення .env файлів...");
+  setProgress(82);
+  var created = 0;
+
+  if (!fso.FileExists(bEnv)) {
+    try {
+      var bf = fso.CreateTextFile(bEnv, true);
+      bf.Write(
+        "MONGO_URL=mongodb://localhost:27017\r\n" +
+        "DB_NAME=kafedra_db\r\n" +
+        "CORS_ORIGINS=http://localhost:3000\r\n" +
+        "SMTP_PASSWORD=\r\n"
+      );
+      bf.Close();
+      log("backend/.env створено", "ok");
+      created++;
+    } catch(e) {
+      log("Не вдалось створити backend/.env: " + e.message, "err");
+    }
+  } else {
+    log("backend/.env вже існує — пропущено", "warn");
+  }
+
+  if (!fso.FileExists(fEnv)) {
+    try {
+      var ff = fso.CreateTextFile(fEnv, true);
+      ff.Write("REACT_APP_BACKEND_URL=http://localhost:8000\r\n");
+      ff.Close();
+      log("frontend/.env створено", "ok");
+      created++;
+    } catch(e) {
+      log("Не вдалось створити frontend/.env: " + e.message, "err");
+    }
+  } else {
+    log("frontend/.env вже існує — пропущено", "warn");
+  }
+
+  setStep(3, "done", created + " .env файл(и) створено ✓");
+  setProgress(100);
+
+  log("─────────────────────────────────────────────────────────", "sep");
+  log("Встановлення завершено!", "ok");
+
+  setStatus("done", "Готово");
+  document.getElementById("hint").innerHTML = "&#10003;&nbsp; Встановлення завершено! Запустіть сервери вручну.";
+  document.getElementById("nextSteps").style.display = "block";
+  btn.style.display = "none";
+  document.getElementById("closeBtn").style.display = "inline-block";
+}
+</script>
+</body>
+</html>
