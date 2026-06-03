@@ -19,7 +19,7 @@ export default function LabProjectDetailsPage() {
       .then(r => setProject(r.data))
       .catch(() => { })
       .finally(() => setLoading(false));
-  }, [id, language]);
+  }, [id, language, project]);
 
   if (loading) {
     return (

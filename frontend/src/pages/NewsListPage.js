@@ -37,7 +37,7 @@ export default function NewsListPage() {
       .then(r => setData(r.data))
       .catch(() => setData(null))
       .finally(() => { setLoading(false); setRefreshing(false); });
-  }, [category, page, language]);
+  }, [category, page, language, data]);
 
   const handleCategoryChange = (cat) => {
     setCategory(cat);

@@ -18,7 +18,7 @@ export default function SpecialtyDetailPage() {
       .then(r => setSpecialty(r.data))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [id, language]);
+  }, [id, language, specialty]);
 
   if (loading) {
     return (

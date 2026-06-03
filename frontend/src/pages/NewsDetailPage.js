@@ -34,7 +34,7 @@ export default function NewsDetailPage() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [id, language]);
+  }, [id, language, article]);
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
