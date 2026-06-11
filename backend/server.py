@@ -3908,10 +3908,20 @@ async def seed_database():
     return {"message": "Seeded", "staff": len(staff_data), "news": len(news_data), "labs": len(labs_data), "projects": len(proj_data)}
 
 # ══ FILL RANDOM ELECTIVES ══
-ELECTIVE_BLOCKS = [
-    ["Аналіз даних та програмні системи", "Розробка ігрових додатків на Unity"],
-    ["Управління IT-проектами (Agile/Scrum)", "Проектування мобільних інтерфейсів"],
-]
+ELECTIVE_BLOCKS_BY_COURSE = {
+    1: [
+        ["Аналіз даних та програмні системи", "Розробка ігрових додатків на Unity"],
+        ["Основи кібербезпеки", "Хмарні обчислення (AWS/Azure)"],
+    ],
+    2: [
+        ["Машинне навчання та нейронні мережі", "Big Data аналітика"],
+        ["Управління IT-проектами (Agile/Scrum)", "Тестування та QA"],
+    ],
+    3: [
+        ["Архітектура мікросервісів", "Blockchain та Web3 розробка"],
+        ["Підприємництво в IT", "DevSecOps та автоматизація"],
+    ],
+}
 
 @api_router.post("/seed-electives", 
     summary="Призначити випадкові вибіркові студентам",
@@ -3926,12 +3936,14 @@ async def seed_electives():
             "is_seeded": True,
             "electives_submitted_at": {"$exists": False}
         },
-        {"_id": 0, "id": 1}
+        {"_id": 0, "id": 1, "course": 1}
     ).to_list(None)
 
     count = 0
     for s in students:
-        selections = [random.choice(block) for block in ELECTIVE_BLOCKS]
+        course = s.get("course", 1)
+        blocks = ELECTIVE_BLOCKS_BY_COURSE.get(course, ELECTIVE_BLOCKS_BY_COURSE[1])
+        selections = [random.choice(block) for block in blocks]
         await db.users.update_one(
             {"id": s["id"]},
             {"$set": {

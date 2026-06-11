@@ -137,47 +137,48 @@ const AdminTabNav = ({ active, onChange }) => {
 
 // ─── TAB 1: Electives Monitoring ───────────────────────────────────────────────
 
-const getElectiveBlocks = (t) => [
-  {
-    id: 'b1',
-    title: t('electives.block1_title'),
-    disciplines: [
-      { id: 'd1', name: t('electives.d1_name') },
-      { id: 'd2', name: t('electives.d2_name') },
-    ],
-  },
-  {
-    id: 'b2',
-    title: t('electives.block2_title'),
-    disciplines: [
-      { id: 'd3', name: t('electives.d3_name') },
-      { id: 'd4', name: t('electives.d4_name') },
-    ],
-  },
-];
-
-const UA_DISCIPLINE_NAMES = [
-  'Аналіз даних та програмні системи',
-  'Розробка ігрових додатків на Unity',
-  'Управління IT-проектами (Agile/Scrum)',
-  'Проектування мобільних інтерфейсів',
-];
-const DISCIPLINE_IDS = ['d1', 'd2', 'd3', 'd4'];
-const ID_TO_NAME = {
-  d1: 'electives.d1_name', d2: 'electives.d2_name',
-  d3: 'electives.d3_name', d4: 'electives.d4_name',
+const getElectiveBlocksByCourse = (t, course) => {
+  const c = Number(course);
+  if (c === 1) return [
+    { id: 'b1', title: t('electives.c1_block1_title'), disciplines: [
+      { id: 'c1_b1_d1', name: t('electives.c1_b1_d1_name'), nameUA: 'Аналіз даних та програмні системи' },
+      { id: 'c1_b1_d2', name: t('electives.c1_b1_d2_name'), nameUA: 'Розробка ігрових додатків на Unity' },
+    ]},
+    { id: 'b2', title: t('electives.c1_block2_title'), disciplines: [
+      { id: 'c1_b2_d1', name: t('electives.c1_b2_d1_name'), nameUA: 'Основи кібербезпеки' },
+      { id: 'c1_b2_d2', name: t('electives.c1_b2_d2_name'), nameUA: 'Хмарні обчислення (AWS/Azure)' },
+    ]},
+  ];
+  if (c === 2) return [
+    { id: 'b1', title: t('electives.c2_block1_title'), disciplines: [
+      { id: 'c2_b1_d1', name: t('electives.c2_b1_d1_name'), nameUA: 'Машинне навчання та нейронні мережі' },
+      { id: 'c2_b1_d2', name: t('electives.c2_b1_d2_name'), nameUA: 'Big Data аналітика' },
+    ]},
+    { id: 'b2', title: t('electives.c2_block2_title'), disciplines: [
+      { id: 'c2_b2_d1', name: t('electives.c2_b2_d1_name'), nameUA: 'Управління IT-проектами (Agile/Scrum)' },
+      { id: 'c2_b2_d2', name: t('electives.c2_b2_d2_name'), nameUA: 'Тестування та QA' },
+    ]},
+  ];
+  return [
+    { id: 'b1', title: t('electives.c3_block1_title'), disciplines: [
+      { id: 'c3_b1_d1', name: t('electives.c3_b1_d1_name'), nameUA: 'Архітектура мікросервісів' },
+      { id: 'c3_b1_d2', name: t('electives.c3_b1_d2_name'), nameUA: 'Blockchain та Web3 розробка' },
+    ]},
+    { id: 'b2', title: t('electives.c3_block2_title'), disciplines: [
+      { id: 'c3_b2_d1', name: t('electives.c3_b2_d1_name'), nameUA: 'Підприємництво в IT' },
+      { id: 'c3_b2_d2', name: t('electives.c3_b2_d2_name'), nameUA: 'DevSecOps та автоматизація' },
+    ]},
+  ];
 };
 
 const getVoteCounts = (students, blocks) => {
-  const idToName = {};
-  const allDisciplines = blocks.flatMap(b => b.disciplines); // [{id, name}, ...]
-  allDisciplines.forEach((d, i) => {
-    idToName[d.id] = d.name;
-    if (UA_DISCIPLINE_NAMES[i]) idToName[UA_DISCIPLINE_NAMES[i]] = d.name;
+  const uaToTranslated = {};
+  blocks.flatMap(b => b.disciplines).forEach(d => {
+    uaToTranslated[d.nameUA] = d.name;
   });
   const counts = {};
-  students.forEach(s => (s.elective_selections || []).forEach(d => {
-    const label = idToName[d] || d;
+  students.forEach(s => (s.elective_selections || []).forEach(sel => {
+    const label = uaToTranslated[sel] || sel;
     counts[label] = (counts[label] || 0) + 1;
   }));
   return counts;
@@ -213,7 +214,6 @@ const BarChart = ({ counts }) => {
 
 const TabElectives = () => {
   const { t, language } = useLanguage();
-  const ELECTIVE_BLOCKS = getElectiveBlocks(t);
   const { alert, confirm, alertState, confirmState, closeAlert, closeConfirm } = useModals();
   const [course, setCourse] = useState('1');
   const [group, setGroup] = useState('all');
@@ -223,15 +223,13 @@ const TabElectives = () => {
   const [students, setStudents] = useState([]);
   const [rawGroups, setRawGroups] = useState([]);
   const [loading, setLoading] = useState(false);
+  const ELECTIVE_BLOCKS = getElectiveBlocksByCourse(t, course);
   const LIMIT = 10;
 
   const ALL_DISCIPLINES = [
     { value: 'all', label: t('admin.all_disciplines') },
     { value: 'none', label: t('admin.not_chosen') },
-    { value: 'd1', label: t('electives.d1_name') },
-    { value: 'd2', label: t('electives.d2_name') },
-    { value: 'd3', label: t('electives.d3_name') },
-    { value: 'd4', label: t('electives.d4_name') },
+    ...ELECTIVE_BLOCKS.flatMap(b => b.disciplines).map(d => ({ value: d.nameUA, label: d.name })),
   ];
 
   const groupOptions = [
@@ -260,24 +258,13 @@ const TabElectives = () => {
 
   const allStudents = students;
 
-  const disciplineIdx = ['d1','d2','d3','d4'].indexOf(discipline);
-  const disciplineAllNames = disciplineIdx >= 0
-    ? [
-        ELECTIVE_BLOCKS.flatMap(b => b.disciplines)[disciplineIdx],
-        UA_DISCIPLINE_NAMES[disciplineIdx],
-        discipline,
-      ]
-    : [];
-
   const filtered = discipline === 'none'
-    ? allStudents.filter(s => !(s.elective_selections || []).length)
-    : discipline === 'all'
-    ? allStudents
-    : allStudents.filter(s =>
-        (s.elective_selections || []).some(sel =>
-          disciplineAllNames.includes(sel)
-        )
-      );
+  ? allStudents.filter(s => !(s.elective_selections || []).length)
+  : discipline === 'all'
+  ? allStudents
+  : allStudents.filter(s =>
+      (s.elective_selections || []).some(sel => sel === discipline)
+    );
 
   const showStats = discipline !== 'none';
   const votedCount = allStudents.filter(s => s.elective_selections?.length > 0).length;
@@ -293,27 +280,19 @@ const TabElectives = () => {
     ];
 
     const dataRows = filtered.map((s, i) => {
-      const selections = (s.elective_selections || []).map(sel =>
-        ID_TO_NAME[sel] ? t(ID_TO_NAME[sel]) : sel
-      );
+      const selections = s.elective_selections || [];
       let disciplineCell;
       if (selections.length === 0) {
         disciplineCell = t('admin.not_selected');
-      } else if (discipline !== 'all' && discipline !== 'none' && disciplineAllNames.length > 0) {
-        // Only show the matched discipline
-        const matched = selections.filter(sel => disciplineAllNames.includes(sel));
+      } else if (discipline !== 'all' && discipline !== 'none') {
+        const matched = selections.filter(sel => sel === discipline);
         disciplineCell = matched.length > 0
           ? matched.map((d, j) => `${j + 1}. ${d}`).join('\n')
           : t('admin.not_selected');
       } else {
         disciplineCell = selections.map((d, j) => `${j + 1}. ${d}`).join('\n');
       }
-      return [
-        i + 1,
-        s.name,
-        s.group_name || s.group_id || '—',
-        disciplineCell,
-      ];
+      return [i + 1, s.name, s.group_name || s.group_id || '—', disciplineCell];
     });
 
     const wb = XLSX.utils.book_new();
@@ -448,14 +427,12 @@ const TabElectives = () => {
               <div className="text-sm text-muted-foreground">{s.group_name || s.group_id || '—'}</div>
               <div className="text-sm text-muted-foreground">
                 {(() => {
-                  const selections = (s.elective_selections || []).map(sel =>
-                    ID_TO_NAME[sel] ? t(ID_TO_NAME[sel]) : sel
-                  );
+                  const selections = s.elective_selections || [];
                   if (selections.length === 0) {
                     return <span className="text-muted-foreground/60 italic">{t('admin.not_selected')}</span>;
                   }
-                  if (discipline !== 'all' && discipline !== 'none' && disciplineAllNames.length > 0) {
-                    const matched = selections.filter(sel => disciplineAllNames.includes(sel));
+                  if (discipline !== 'all' && discipline !== 'none') {
+                    const matched = selections.filter(sel => sel === discipline);
                     return matched.length > 0
                       ? matched.map((d, j) => <div key={j}>1. {d}</div>)
                       : <span className="text-muted-foreground/60 italic">{t('admin.not_selected')}</span>;
@@ -518,7 +495,7 @@ const TabElectives = () => {
                     </div>
                     <div className="divide-y divide-border">
                       {block.disciplines.map(d => {
-                        const isChecked = blockSelected === d.id || blockSelected === d.name;
+                        const isChecked = blockSelected === d.nameUA || blockSelected === d.id;
                         return (
                           <label
                             key={d}
@@ -532,7 +509,7 @@ const TabElectives = () => {
                               onChange={() => {
                                 const currentSels = editStudent.elective_selections || [];
                                 const newSels = ELECTIVE_BLOCKS.map(b => {
-                                  if (b.id === block.id) return d.id;
+                                  if (b.id === block.id) return d.nameUA;
                                   return currentSels.find(s => b.disciplines.some(bd => bd.id === s || bd.name === s)) || null;
                                 }).filter(Boolean);
                                 setEditStudent(prev => ({ ...prev, elective_selections: newSels }));
@@ -540,7 +517,7 @@ const TabElectives = () => {
                               className="accent-primary"
                             />
                             <span className={`text-sm ${isChecked ? 'text-primary font-medium' : 'text-foreground'}`}>
-                              {d.name}
+                              {d.nameUA}
                             </span>
                           </label>
                         );

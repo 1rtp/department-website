@@ -22,7 +22,7 @@ export default function NewsDetailPage() {
 
   useEffect(() => {
     if (!id) return;
-    if (!article) setLoading(true);
+    setLoading(true);
     setRelatedIndex(0);
     Promise.all([
       newsApi.getById(id),
@@ -34,7 +34,7 @@ export default function NewsDetailPage() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [id, language, article]);
+  }, [id, language]);
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';

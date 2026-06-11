@@ -14,12 +14,12 @@ export default function LabProjectDetailsPage() {
 
   useEffect(() => {
     if (!id) return;
-    if (!project) setLoading(true);
+    setLoading(true);
     labProjectsApi.getById(id)
       .then(r => setProject(r.data))
       .catch(() => { })
       .finally(() => setLoading(false));
-  }, [id, language, project]);
+  }, [id, language]);
 
   if (loading) {
     return (

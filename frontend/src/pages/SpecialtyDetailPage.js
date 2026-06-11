@@ -13,12 +13,12 @@ export default function SpecialtyDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!specialty) setLoading(true);
+    setLoading(true);
     specialtiesApi.getById(id)
       .then(r => setSpecialty(r.data))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [id, language, specialty]);
+  }, [id, language]);
 
   if (loading) {
     return (

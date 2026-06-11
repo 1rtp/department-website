@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Newspaper } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Skeleton } from '../components/ui/skeleton';
@@ -28,16 +28,22 @@ export default function NewsListPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const isFirstLoad = useRef(true);
 
   useEffect(() => {
-    const params = { page, limit: LIMIT };
+  const params = { page, limit: LIMIT };
     if (category !== 'all') params.category = category;
-    if (!data) { setLoading(true); } else { setRefreshing(true); }
+    if (isFirstLoad.current) {
+      setLoading(true);
+      isFirstLoad.current = false;
+    } else {
+      setRefreshing(true);
+    }
     newsApi.getAll(params)
       .then(r => setData(r.data))
       .catch(() => setData(null))
       .finally(() => { setLoading(false); setRefreshing(false); });
-  }, [category, page, language, data]);
+  }, [category, page, language]);
 
   const handleCategoryChange = (cat) => {
     setCategory(cat);

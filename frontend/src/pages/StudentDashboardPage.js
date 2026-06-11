@@ -789,31 +789,48 @@ const TabSchedule = ({ user, examSchedule = [] }) => {
 
 // ─── TAB: Electives ───────────────────────────────────────────────────────────
 
-const getElectiveBlocks = (t) => [
-  {
-    id: 'b1',
-    title: t('electives.block1_title'),
-    disciplines: [
-      { id: 'd1', name: t('electives.d1_name'), teacher: t('electives.d1_teacher'), description: t('electives.d1_desc') },
-      { id: 'd2', name: t('electives.d2_name'), teacher: t('electives.d2_teacher'), description: t('electives.d2_desc') },
-    ],
-  },
-  {
-    id: 'b2',
-    title: t('electives.block2_title'),
-    disciplines: [
-      { id: 'd3', name: t('electives.d3_name'), teacher: t('electives.d3_teacher'), description: t('electives.d3_desc') },
-      { id: 'd4', name: t('electives.d4_name'), teacher: t('electives.d4_teacher'), description: t('electives.d4_desc') },
-    ],
-  },
-];
+const getElectiveBlocksByCourse = (t, course) => {
+  const c = Number(course);
+  if (c === 1) return [
+    { id: 'b1', title: t('electives.c1_block1_title'), disciplines: [
+      { id: 'c1_b1_d1', name: t('electives.c1_b1_d1_name'), teacher: t('electives.c1_b1_d1_teacher'), description: t('electives.c1_b1_d1_desc') },
+      { id: 'c1_b1_d2', name: t('electives.c1_b1_d2_name'), teacher: t('electives.c1_b1_d2_teacher'), description: t('electives.c1_b1_d2_desc') },
+    ]},
+    { id: 'b2', title: t('electives.c1_block2_title'), disciplines: [
+      { id: 'c1_b2_d1', name: t('electives.c1_b2_d1_name'), teacher: t('electives.c1_b2_d1_teacher'), description: t('electives.c1_b2_d1_desc') },
+      { id: 'c1_b2_d2', name: t('electives.c1_b2_d2_name'), teacher: t('electives.c1_b2_d2_teacher'), description: t('electives.c1_b2_d2_desc') },
+    ]},
+  ];
+  
+  if (c === 2) return [
+    { id: 'b1', title: t('electives.c2_block1_title'), disciplines: [
+      { id: 'c2_b1_d1', name: t('electives.c2_b1_d1_name'), teacher: t('electives.c2_b1_d1_teacher'), description: t('electives.c2_b1_d1_desc') },
+      { id: 'c2_b1_d2', name: t('electives.c2_b1_d2_name'), teacher: t('electives.c2_b1_d2_teacher'), description: t('electives.c2_b1_d2_desc') },
+    ]},
+    { id: 'b2', title: t('electives.c2_block2_title'), disciplines: [
+      { id: 'c2_b2_d1', name: t('electives.c2_b2_d1_name'), teacher: t('electives.c2_b2_d1_teacher'), description: t('electives.c2_b2_d1_desc') },
+      { id: 'c2_b2_d2', name: t('electives.c2_b2_d2_name'), teacher: t('electives.c2_b2_d2_teacher'), description: t('electives.c2_b2_d2_desc') },
+    ]},
+  ];
+  
+  return [
+    { id: 'b1', title: t('electives.c3_block1_title'), disciplines: [
+      { id: 'c3_b1_d1', name: t('electives.c3_b1_d1_name'), teacher: t('electives.c3_b1_d1_teacher'), description: t('electives.c3_b1_d1_desc') },
+      { id: 'c3_b1_d2', name: t('electives.c3_b1_d2_name'), teacher: t('electives.c3_b1_d2_teacher'), description: t('electives.c3_b1_d2_desc') },
+    ]},
+    { id: 'b2', title: t('electives.c3_block2_title'), disciplines: [
+      { id: 'c3_b2_d1', name: t('electives.c3_b2_d1_name'), teacher: t('electives.c3_b2_d1_teacher'), description: t('electives.c3_b2_d1_desc') },
+      { id: 'c3_b2_d2', name: t('electives.c3_b2_d2_name'), teacher: t('electives.c3_b2_d2_teacher'), description: t('electives.c3_b2_d2_desc') },
+    ]},
+  ];
+};
 
 const TabElectives = ({ user, selected, setSelected, submitted, setSubmitted }) => {
   const { t, language } = useLanguage();
   const { alert, alertState, closeAlert } = useModals();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const ELECTIVE_BLOCKS = getElectiveBlocks(t);
+  const ELECTIVE_BLOCKS = getElectiveBlocksByCourse(t, user?.course);
 
   useEffect(() => {
     if (submitted && Object.keys(selected).length > 0) {
@@ -851,10 +868,17 @@ const TabElectives = ({ user, selected, setSelected, submitted, setSubmitted }) 
   };
 
   const handleSubmit = async () => {
-    const selectedIds = Object.values(selected).filter(Boolean);
+    const selectedNames = Object.entries(selected)
+      .filter(([, discId]) => discId)
+      .map(([blockId, discId]) => {
+        const block = ELECTIVE_BLOCKS.find(b => b.id === blockId);
+        const disc = block?.disciplines.find(d => d.id === discId);
+        return disc?.name;
+      })
+      .filter(Boolean);
     setSaving(true);
     try {
-      await studentApi.submitElectives({ selected_disciplines: selectedIds });
+      await studentApi.submitElectives({ selected_disciplines: selectedNames });
       setSubmitted(true);
     } catch (e) {
       alert(`${t('dashboard.electives_save_error')}: ${e?.response?.data?.detail || e.message}`, 'error');
@@ -871,7 +895,7 @@ const TabElectives = ({ user, selected, setSelected, submitted, setSubmitted }) 
         {t('dashboard.greeting')} {user?.name?.split(' ')[1] || user?.name?.split(' ')[0] || t('dashboard.student_fallback')}!
       </h1>
       <p className="text-muted-foreground mb-6 text-sm">
-        {t('dashboard.electives_subtitle_prefix')} {user?.semester || '—'} {t('dashboard.semester_suffix')}
+        {t('dashboard.electives_subtitle_prefix')} {user?.course ? Number(user.course) + 1 : '—'} {t('register.course_suffix')}
       </p>
 
       {submitted ? (
@@ -988,6 +1012,15 @@ export default function StudentDashboardPage() {
   const [electivesSubmitted, setElectivesSubmitted] = useState(false);
 
   useEffect(() => {
+    if (!user?.id) return;
+    localStorage.setItem(`electives_selected_${user.id}`, JSON.stringify(electivesSelected));
+  }, [electivesSelected, user?.id]);
+  useEffect(() => {
+    if (!user?.id) return;
+    localStorage.setItem(`electives_submitted_${user.id}`, String(electivesSubmitted));
+  }, [electivesSubmitted, user?.id]);
+
+  useEffect(() => {
     const stored = localStorage.getItem('auth_user');
     const token = localStorage.getItem('auth_token');
     if (!stored || !token) { navigate('/login'); return; }
@@ -997,6 +1030,11 @@ export default function StudentDashboardPage() {
         const freshUser = r.data;
         setUser(freshUser);
         localStorage.setItem('auth_user', JSON.stringify(freshUser));
+
+        const savedSelected = localStorage.getItem(`electives_selected_${freshUser.id}`);
+        const savedSubmitted = localStorage.getItem(`electives_submitted_${freshUser.id}`);
+        if (savedSelected) setElectivesSelected(JSON.parse(savedSelected));
+        if (savedSubmitted) setElectivesSubmitted(savedSubmitted === 'true');
 
         return Promise.all([
           freshUser.group_id ? studentApi.getSchedule(freshUser.group_id).catch(() => null) : Promise.resolve(null),
