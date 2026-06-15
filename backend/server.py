@@ -3994,7 +3994,7 @@ async def get_student_me(token: str = Query(...), lang: str = Query("ua")):
         "Body: `{\"email\": \"новий@email.com\", \"phone\": \"+380501234567\"}`"
     ),
 )
-async def update_student_contacts(req: UpdateContactsRequest, token: str = Query(...)):
+async def update_student_contacts(req: UpdateContactsRequest, token: str = Query(...), lang: str = Query("ua")):
     session = await db.sessions.find_one({"token": token})
     if not session:
         raise HTTPException(status_code=401, detail="Недійсний токен")
@@ -4029,7 +4029,7 @@ async def update_student_contacts(req: UpdateContactsRequest, token: str = Query
             "curator_phone": curator_user.get("phone") if curator_user else None,
         }
 
-    return user
+    return localize(user, lang)
 
 # ══════════════ EXAM SCHEDULE ══════════════
 
@@ -4296,7 +4296,7 @@ async def update_student_photo(data: dict, token: str = Query(...)):
     summary="Оновити контакти викладача",
     description="**token** — токен викладача. Body: {\"email\": \"новий@email.com\", \"phone\": \"+380...\"}"
 )
-async def update_staff_contacts(req: UpdateContactsRequest, token: str = Query(...)):
+async def update_staff_contacts(req: UpdateContactsRequest, token: str = Query(...), lang: str = Query("ua")):
     session = await db.sessions.find_one({"token": token})
     if not session:
         raise HTTPException(status_code=401, detail="Недійсний токен")
@@ -4325,7 +4325,7 @@ async def update_staff_contacts(req: UpdateContactsRequest, token: str = Query(.
             await db.staff.update_one({"email": old_email}, {"$set": {"email": update_user["email"]}})
 
     updated_user = await db.users.find_one({"id": session["user_id"]}, {"_id": 0, "hashed_password": 0})
-    return updated_user
+    return localize(updated_user, lang)
  
  
 @api_router.put("/staff-profile/password", 
