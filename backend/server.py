@@ -4421,8 +4421,15 @@ async def delete_staff_publication(pub_id: str, token: str = Query(...)):
     user = await db.users.find_one({"id": session["user_id"]}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="Не знайдено")
-    if user.get("email"):
-        staff_query = {"id": user["staff_id"]} if user.get("staff_id") else {"email": user.get("email")}
+    staff_query = {"id": user["staff_id"]} if user.get("staff_id") else {"email": user.get("email")}
+    staff_doc = await db.staff.find_one(staff_query, {"_id": 0, "publications": 1})
+    if staff_doc:
+        pub = next((p for p in staff_doc.get("publications", []) if p.get("id") == pub_id), None)
+        if pub and pub.get("file_id"):
+            try:
+                await fs.delete(ObjectId(pub["file_id"]))
+            except Exception as e:
+                logger.warning(f"GridFS delete (pub) failed: {e}")
         await db.staff.update_one(staff_query, {"$pull": {"publications": {"id": pub_id}}})
     return {"message": "Видалено"}
  
@@ -4499,8 +4506,16 @@ async def delete_staff_certificate(cert_id: str, token: str = Query(...)):
     user = await db.users.find_one({"id": session["user_id"]}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="Не знайдено")
-    if user.get("email"):
-        await db.staff.update_one({"email": user["email"]}, {"$pull": {"certificates": {"id": cert_id}}})
+    staff_query = {"id": user["staff_id"]} if user.get("staff_id") else {"email": user.get("email")}
+    staff_doc = await db.staff.find_one(staff_query, {"_id": 0, "certificates": 1})
+    if staff_doc:
+        cert = next((c for c in staff_doc.get("certificates", []) if c.get("id") == cert_id), None)
+        if cert and cert.get("file_id"):
+            try:
+                await fs.delete(ObjectId(cert["file_id"]))
+            except Exception as e:
+                logger.warning(f"GridFS delete (cert) failed: {e}")
+        await db.staff.update_one(staff_query, {"$pull": {"certificates": {"id": cert_id}}})
     return {"message": "Видалено"}
 
 @api_router.get("/staff-profile/file/{file_id}", 
