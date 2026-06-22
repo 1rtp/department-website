@@ -3580,17 +3580,17 @@ async def seed_database():
     # ══════════════ SEED REMAINING STAFF USERS ══════════════
     remaining_staff = [
         {"email": "petenko.i@gmail.com",    "name": "Петренко Іван Олексійович",       "staff_id": p_id, "phone": "+380 44 555-11-22"},
-        # {"email": "kovalenko.m@gmail.com",  "name": "Коваленко Марія Степанівна",      "staff_id": k_id},
-        {"email": "shevchenko.o@gmail.com", "name": "Шевченко Олексій Петрович",       "staff_id": sh_id},
-        {"email": "bondarenko.n@gmail.com", "name": "Бондаренко Наталія Вікторівна",   "staff_id": b_id},
-        # {"email": "tkachenko.s@gmail.com",  "name": "Ткаченко Сергій Михайлович",      "staff_id": t_id},
-        {"email": "melnyk.o@gmail.com",     "name": "Мельник Оксана Іванівна",         "staff_id": m_id},
-        {"email": "lysenko.a@gmail.com",    "name": "Лисенко Андрій Юрійович",         "staff_id": l_id},
-        {"email": "kravchenko.y@gmail.com", "name": "Кравченко Юлія Олександрівна",   "staff_id": kr_id},
-        # {"email": "ivanov.d@gmail.com",     "name": "Іванов Дмитро Сергійович",        "staff_id": i_id},
-        {"email": "oliynyk.t@gmail.com",    "name": "Олійник Тетяна Василівна",        "staff_id": o_id},
-        {"email": "polishchuk.v@gmail.com", "name": "Поліщук Василь Миколайович",     "staff_id": pl_id},
-        {"email": "sytnyk.l@gmail.com",     "name": "Ситник Лариса Олексіївна",        "staff_id": s_id},
+        # {"email": "kovalenko.m@gmail.com",  "name": "Коваленко Марія Степанівна",    "staff_id": k_id, "phone": "+380 44 555-11-22"},
+        {"email": "shevchenko.o@gmail.com", "name": "Шевченко Олексій Петрович",      "staff_id": sh_id, "phone": "+380 44 555-11-22"},
+        {"email": "bondarenko.n@gmail.com", "name": "Бондаренко Наталія Вікторівна",   "staff_id": b_id, "phone": "+380 44 555-11-22"},
+        # {"email": "tkachenko.s@gmail.com",  "name": "Ткаченко Сергій Михайлович",    "staff_id": t_id, "phone": "+380 44 555-11-22"},
+        {"email": "melnyk.o@gmail.com",     "name": "Мельник Оксана Іванівна",         "staff_id": m_id, "phone": "+380 44 555-11-22"},
+        {"email": "lysenko.a@gmail.com",    "name": "Лисенко Андрій Юрійович",         "staff_id": l_id, "phone": "+380 44 555-11-22"},
+        {"email": "kravchenko.y@gmail.com", "name": "Кравченко Юлія Олександрівна",   "staff_id": kr_id, "phone": "+380 44 555-11-22"},
+        # {"email": "ivanov.d@gmail.com",     "name": "Іванов Дмитро Сергійович",      "staff_id": i_id, "phone": "+380 44 555-11-22"},
+        {"email": "oliynyk.t@gmail.com",    "name": "Олійник Тетяна Василівна",        "staff_id": o_id, "phone": "+380 44 555-11-22"},
+        {"email": "polishchuk.v@gmail.com", "name": "Поліщук Василь Миколайович",     "staff_id": pl_id, "phone": "+380 44 555-11-22"},
+        {"email": "sytnyk.l@gmail.com",     "name": "Ситник Лариса Олексіївна",        "staff_id": s_id, "phone": "+380 44 555-11-22"},
     ]
     
     staff_hashed_password = pwd_context.hash("staff123")
